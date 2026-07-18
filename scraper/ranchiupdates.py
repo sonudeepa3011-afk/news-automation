@@ -13,9 +13,11 @@ def html_to_text(html):
 
 
 def get_latest_news():
+
     news = []
 
     try:
+
         response = requests.get(API_URL, headers=HEADERS, timeout=20)
         response.raise_for_status()
 
@@ -24,6 +26,7 @@ def get_latest_news():
         for post in posts:
 
             title = html_to_text(post["title"]["rendered"]).strip()
+
             content = html_to_text(post["content"]["rendered"]).strip()
 
             if len(content) < 100:
