@@ -2,7 +2,7 @@ from newsdata import get_latest_news
 from gemini_ai import generate_news
 from wordpress import create_draft
 from duplicate import is_duplicate
-
+from scraper.avenue_mail import get_latest_news
 
 def main():
     try:
