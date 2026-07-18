@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 BASE_URL = "https://avenuemail.in/"
 
@@ -9,22 +10,31 @@ HEADERS = {
 
 
 def get_article_content(url):
+
     try:
+
         response = requests.get(url, headers=HEADERS, timeout=20)
 
         if response.status_code != 200:
             return ""
 
-        soup = BeautifulSoup(response.text, "lxml")
+        soup = BeautifulSoup(response.text, "html.parser")
 
-        paragraphs = soup.find_all("p")
+        article = (
+            soup.find("div", class_="entry-content")
+            or soup.find("article")
+            or soup
+        )
+
+        paragraphs = article.find_all("p")
 
         content = []
 
         for p in paragraphs:
+
             text = p.get_text(" ", strip=True)
 
-            if len(text) > 40:
+            if len(text) > 25:
                 content.append(text)
 
         return "\n".join(content)
@@ -36,6 +46,8 @@ def get_article_content(url):
 
 def get_latest_news():
 
+    news = []
+
     try:
 
         response = requests.get(BASE_URL, headers=HEADERS, timeout=20)
@@ -43,20 +55,30 @@ def get_latest_news():
         if response.status_code != 200:
             return []
 
-        soup = BeautifulSoup(response.text, "lxml")
+        soup = BeautifulSoup(response.text, "html.parser")
 
-        news = []
         seen = set()
 
-        for a in soup.find_all("a", href=True):
+        articles = soup.find_all("article")
 
-            title = a.get_text(" ", strip=True)
-            url = a["href"]
+        today = datetime.now().strftime("%Y-%m-%d")
 
-            if not url.startswith("http"):
+        for article in articles:
+
+            h2 = article.find(["h2", "h3"])
+
+            if not h2:
                 continue
 
-            if len(title) < 25:
+            a = h2.find("a")
+
+            if not a:
+                continue
+
+            title = a.get_text(strip=True)
+            url = a.get("href")
+
+            if not url:
                 continue
 
             if url in seen:
@@ -64,25 +86,23 @@ def get_latest_news():
 
             seen.add(url)
 
-            print("Reading:", title)
+            content = get_article_content(url)
 
-            article = get_article_content(url)
-
-            if len(article) < 100:
+            if len(content) < 100:
                 continue
 
             news.append({
                 "title": title,
-                "description": article[:500],
-                "content": article,
-                "url": url
+                "content": content,
+                "description": content[:500],
+                "url": url,
+                "date": today
             })
 
-            if len(news) == 10:
+            if len(news) >= 10:
                 break
 
-        return news
-
     except Exception as e:
-        print("Homepage Error:", e)
-        return []
+        print("Avenue Mail Error:", e)
+
+    return news
