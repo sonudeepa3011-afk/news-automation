@@ -1,4 +1,4 @@
 requests==2.32.3
-google-genai
+google-generativeai
 feedparser==6.0.11
 python-dotenv==1.0.1
