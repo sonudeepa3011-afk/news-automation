@@ -16,7 +16,7 @@ Description:
 {description}
 
 Requirements:
-- 1200 to 1500 words
+- 300 to 400 words
 - H2 and H3 headings
 - Short paragraphs
 - Human writing style
