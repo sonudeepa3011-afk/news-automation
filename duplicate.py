@@ -1,16 +1,17 @@
-import requests
 import os
+import requests
+from slugify import slugify
 
 WP_URL = os.getenv("WP_URL")
 WP_USERNAME = os.getenv("WP_USERNAME")
 WP_APP_PASSWORD = os.getenv("WP_APP_PASSWORD")
 
 
-def is_duplicate(title, slug):
-    url = f"{WP_URL}/wp-json/wp/v2/posts"
+def is_duplicate(title):
+    slug = slugify(title)
 
     response = requests.get(
-        url,
+        f"{WP_URL}/wp-json/wp/v2/posts",
         params={
             "search": slug,
             "per_page": 10,
@@ -34,7 +35,7 @@ def is_duplicate(title, slug):
         if wp_title == title:
             return True
 
-        if slug == post["slug"]:
+        if post["slug"] == slug:
             return True
 
     return False
