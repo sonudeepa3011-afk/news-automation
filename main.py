@@ -1,37 +1,47 @@
 from newsdata import get_latest_news
-from gemini_ai import write_article
+from gemini_ai import generate_news
 from wordpress import create_draft
 from duplicate import is_duplicate
 
 
 def main():
     try:
-        # Get latest news
+        print("Fetching latest news...")
+
         news = get_latest_news()
 
-        title = news.get("title", "Untitled News")
+        if not news:
+            print("No news found.")
+            return
+
+        original_title = news.get("title", "")
         description = news.get("description", "")
 
-        print(f"News Title: {title}")
-
-        # Check duplicate
-        if is_duplicate(title):
+        # Duplicate Check
+        if is_duplicate(original_title):
             print("Duplicate news found. Skipping...")
             return
 
-        # Generate article using Gemini
         print("Generating AI Article...")
-        article = write_article(title, description)
 
-        # Save to WordPress Draft
+        result = generate_news(
+            original_title,
+            description
+        )
+
         print("Creating WordPress Draft...")
-        result = create_draft(title, article)
 
-        print("===================================")
-        print("Draft Created Successfully!")
-        print("Post ID :", result.get("id"))
-        print("Post URL:", result.get("link"))
-        print("===================================")
+        create_draft(
+            result["title"],
+            result["slug"],
+            result["article"],
+            result["meta_description"],
+            result["comma_tags"]
+        )
+
+        print("======================================")
+        print("Automation Completed Successfully ✅")
+        print("======================================")
 
     except Exception as e:
         print("ERROR:", str(e))
