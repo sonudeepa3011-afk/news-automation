@@ -1,20 +1,20 @@
-import os
-import requests
+from newsdata import get_latest_news
 
-api_key = os.getenv("NEWSDATA_API_KEY")
+def main():
+    try:
+        news = get_latest_news()
 
-url = f"https://newsdata.io/api/1/news?apikey={api_key}&country=in&language=en"
+        print("=" * 50)
+        print("LATEST NEWS")
+        print("=" * 50)
 
-response = requests.get(url)
+        print("Title :", news.get("title"))
+        print("Source:", news.get("source_name"))
+        print("Date  :", news.get("pubDate"))
+        print("Link  :", news.get("link"))
 
-print("Status:", response.status_code)
+    except Exception as e:
+        print("ERROR:", e)
 
-data = response.json()
-
-if "results" in data and len(data["results"]) > 0:
-    news = data["results"][0]
-    print("Title:", news.get("title"))
-    print("Source:", news.get("source_name"))
-    print("Link:", news.get("link"))
-else:
-    print(data)
+if __name__ == "__main__":
+    main()
