@@ -6,17 +6,18 @@ WP_USERNAME = os.getenv("WP_USERNAME")
 WP_APP_PASSWORD = os.getenv("WP_APP_PASSWORD")
 
 
-def is_duplicate(title):
+def is_duplicate(title, slug):
     url = f"{WP_URL}/wp-json/wp/v2/posts"
 
     response = requests.get(
         url,
         params={
-            "search": title,
-            "per_page": 5,
+            "search": slug,
+            "per_page": 10,
             "status": "draft,publish"
         },
-        auth=(WP_USERNAME, WP_APP_PASSWORD)
+        auth=(WP_USERNAME, WP_APP_PASSWORD),
+        timeout=20
     )
 
     if response.status_code != 200:
@@ -24,8 +25,16 @@ def is_duplicate(title):
 
     posts = response.json()
 
+    title = title.strip().lower()
+
     for post in posts:
-        if post["title"]["rendered"].strip().lower() == title.strip().lower():
+
+        wp_title = post["title"]["rendered"].strip().lower()
+
+        if wp_title == title:
+            return True
+
+        if slug == post["slug"]:
             return True
 
     return False
