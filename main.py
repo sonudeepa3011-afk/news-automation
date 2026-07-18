@@ -6,7 +6,11 @@ from duplicate import is_duplicate
 
 def main():
     try:
-        print("Fetching latest news...")
+        print("=" * 60)
+        print("AI News Automation Started")
+        print("=" * 60)
+
+        print("Fetching latest news from Avenue Mail...")
 
         news_list = get_latest_news()
 
@@ -14,28 +18,38 @@ def main():
             print("No news found.")
             return
 
-        print(f"Found {len(news_list)} news articles.")
+        print(f"\nTotal News Found: {len(news_list)}")
 
-        for news in news_list:
+        for index, news in enumerate(news_list, start=1):
+
+            print("\n" + "=" * 60)
+            print(f"Processing News {index}")
+            print("=" * 60)
 
             title = news["title"]
-            description = news.get("description", "")
+            content = news["content"]
+            url = news["url"]
 
-            print(f"\nChecking: {title}")
+            print("Title:", title)
+            print("URL:", url)
 
             # Duplicate Check
+            print("Checking duplicate...")
+
             if is_duplicate(title):
-                print("Duplicate Found. Skipping...")
+                print("Duplicate article found. Skipping...")
                 continue
 
-            print("Generating AI Article...")
+            # Generate AI Article
+            print("Generating AI article...")
 
             result = generate_news(
                 title,
-                description
+                content
             )
 
-            print("Creating WordPress Draft...")
+            # Create Draft
+            print("Creating WordPress draft...")
 
             create_draft(
                 result["title"],
@@ -45,14 +59,16 @@ def main():
                 result["comma_tags"]
             )
 
-            print("Draft Created Successfully.\n")
+            print("Draft Created Successfully!")
 
-        print("====================================")
-        print("Automation Completed Successfully ✅")
-        print("====================================")
+        print("\n")
+        print("=" * 60)
+        print("Automation Completed Successfully")
+        print("=" * 60)
 
     except Exception as e:
-        print("ERROR:", str(e))
+        print("\nERROR:")
+        print(str(e))
 
 
 if __name__ == "__main__":
