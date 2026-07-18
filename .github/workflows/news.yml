@@ -22,7 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-          - name: Check Installed Packages
+      - name: Check Installed Packages
         run: |
           python -m pip list
           python -c "from bs4 import BeautifulSoup; print('BeautifulSoup OK')"
