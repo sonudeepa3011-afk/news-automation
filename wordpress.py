@@ -6,22 +6,19 @@ WP_USERNAME = os.getenv("WP_USERNAME")
 WP_APP_PASSWORD = os.getenv("WP_APP_PASSWORD")
 
 
-def create_draft(title, article, meta_description, comma_tags):
-    """
-    Create WordPress Draft
-    """
+def create_draft(title, slug, article, meta_description, comma_tags):
+
+    url = f"{WP_URL}/wp-json/wp/v2/posts"
 
     final_content = f"""
 {article}
 
 <hr>
 
-<h2>SEO Details</h2>
+<h3>SEO Details</h3>
 
 <p><strong>Meta Description:</strong></p>
 <p>{meta_description}</p>
-
-<br>
 
 <p><strong>Comma Tags:</strong></p>
 <p>{comma_tags}</p>
@@ -29,6 +26,7 @@ def create_draft(title, article, meta_description, comma_tags):
 
     data = {
         "title": title,
+        "slug": slug,
         "content": final_content,
         "status": "draft"
     }
@@ -38,24 +36,27 @@ def create_draft(title, article, meta_description, comma_tags):
     }
 
     response = requests.post(
-        f"{WP_URL}/wp-json/wp/v2/posts",
+        url,
         headers=headers,
         json=data,
         auth=(WP_USERNAME, WP_APP_PASSWORD)
     )
 
     if response.status_code in [200, 201]:
-        print("===================================")
-        print("Draft Created Successfully!")
-        print("Post ID :", response.json().get("id"))
-        print("Post URL:", response.json().get("link"))
-        print("===================================")
-        return response.json()
+        result = response.json()
 
-    print("===================================")
-    print("WordPress Error")
+        print("=" * 50)
+        print("✅ Draft Created Successfully!")
+        print(f"Post ID  : {result.get('id')}")
+        print(f"Post URL : {result.get('link')}")
+        print("=" * 50)
+
+        return result
+
+    print("=" * 50)
+    print("❌ Failed to Create Draft")
     print("Status Code:", response.status_code)
-    print(response.text)
-    print("===================================")
+    print("Response:", response.text)
+    print("=" * 50)
 
-    raise Exception("Failed to create WordPress draft.")
+    raise Exception("WordPress Draft Creation Failed")
